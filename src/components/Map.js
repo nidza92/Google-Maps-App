@@ -41,6 +41,7 @@ function Map() {
 
   useEffect(() => {
     localStorage.setItem('markerList', JSON.stringify(markerList))
+    console.log(markerList)
   }, [markerList])
 
   const deleteMarker = (id) => {
@@ -59,6 +60,7 @@ function Map() {
     e.preventDefault()
     console.log(addBatchMarkers)
     let splitBatch = addBatchMarkers.trim().split('\n')
+    let batchArray = []
 
     splitBatch.forEach((element) => {
       let markedColor = ''
@@ -83,16 +85,18 @@ function Map() {
           markedColor = markerColors[1].color
           break
       }
-      setMarkerList((oldState) => [
-        ...oldState,
-        {
-          lat: parseInt(newMarker[0]),
-          lng: parseInt(newMarker[1]),
-          id: uuid(),
-          color: markedColor,
-        },
-      ])
+
+      batchArray.push({
+        lat: parseFloat(newMarker[0]),
+        lng: parseFloat(newMarker[1]),
+        id: uuid(),
+        color: markedColor,
+      })
     })
+    let copiedMarkerList = markerList
+    let newState = [...copiedMarkerList, ...batchArray]
+
+    setMarkerList(newState)
   }
 
   if (loadError) return 'Error loading maps'

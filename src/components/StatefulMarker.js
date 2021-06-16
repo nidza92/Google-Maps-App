@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Marker } from '@react-google-maps/api'
 import { markerColors } from '../assets/markerColors'
 
 export default function StatefulMarker({ marker, deleteMarker }) {
   const [color, setColor] = useState(marker.color)
+  const [idx, setIdx] = useState(1)
 
   return (
     <Marker
@@ -18,12 +19,12 @@ export default function StatefulMarker({ marker, deleteMarker }) {
       }}
       onClick={(event) => {
         if (marker.lat === event.latLng.lat()) {
-          let randomColor = Math.floor(Math.random() * markerColors.length)
-          while (markerColors[randomColor].color === color) {
-            randomColor = Math.floor(Math.random() * markerColors.length)
+          if (idx < markerColors.length - 1) {
+            setIdx(idx + 1)
+          } else {
+            setIdx(0)
           }
-
-          setColor(markerColors[randomColor].color)
+          setColor(markerColors[idx].color)
         }
       }}
     ></Marker>
