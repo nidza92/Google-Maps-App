@@ -23,6 +23,15 @@ const getLocalStorage = () => {
   }
 }
 
+const getLocalStorage1 = () => {
+  let bounds = localStorage.getItem('bounds')
+  if (bounds) {
+    return JSON.parse(localStorage.getItem('bounds'))
+  } else {
+    return {}
+  }
+}
+
 function Map() {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
@@ -34,6 +43,8 @@ function Map() {
   const mapRef = React.useRef()
   const onMapLoad = React.useCallback((map) => {
     mapRef.current = map
+    // let k = getLocalStorage1()
+    mapRef.current.fitBounds(getLocalStorage1())
   }, [])
   const panTo = ({ lat, lng }) => {
     mapRef.current.panTo({ lat, lng })
@@ -113,6 +124,27 @@ function Map() {
             zoom={4}
             center={center}
             options={options}
+            // onBoundsChanged={() => {
+            //   var bounds = mapRef.current.getBounds()
+            //   var ne = bounds.getNorthEast()
+            //   var sw = bounds.getSouthWest()
+            //   // console.log(ne.lat())
+            //   // console.log(ne.lng())
+            //   // console.log(sw.lat())
+            //   // console.log(sw.lng())
+            //   console.log(bounds)
+            // }}
+            onIdle={() => {
+              var bounds = mapRef.current.getBounds()
+              var ne = bounds.getNorthEast()
+              var sw = bounds.getSouthWest()
+              // console.log(ne.lat())
+              // console.log(ne.lng())
+              // console.log(sw.lat())
+              // console.log(sw.lng())
+              console.log(bounds)
+              localStorage.setItem('bounds', JSON.stringify(bounds))
+            }}
             onClick={(event) => {
               setMarkerList((oldState) => [
                 ...oldState,
@@ -128,6 +160,7 @@ function Map() {
             {markerList.map((marker) => {
               return (
                 <StatefulMarker
+                  markerList={markerList}
                   key={marker.id}
                   marker={marker}
                   deleteMarker={deleteMarker}
