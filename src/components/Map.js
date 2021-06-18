@@ -40,6 +40,15 @@ const getLocalStorageCenter = () => {
   }
 }
 
+const getStorage = (payload, defaultValue) => {
+  let data = localStorage.getItem(payload)
+  if (data) {
+    return JSON.parse(localStorage.getItem(payload))
+  } else {
+    return defaultValue
+  }
+}
+
 function Map() {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
@@ -51,8 +60,9 @@ function Map() {
   const mapRef = React.useRef()
   const onMapLoad = React.useCallback((map) => {
     mapRef.current = map
-    mapRef.current.setZoom(parseInt(getLocalStorageZoom()))
-    mapRef.current.setCenter(getLocalStorageCenter())
+    mapRef.current.setZoom(parseInt(getStorage('zoom', 4)))
+    // mapRef.current.setCenter(getLocalStorageCenter())
+    mapRef.current.setCenter(getStorage('center', defaultCenter))
   }, [])
   const panTo = ({ lat, lng }) => {
     mapRef.current.panTo({ lat, lng })
