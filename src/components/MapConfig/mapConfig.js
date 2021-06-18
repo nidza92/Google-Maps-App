@@ -5,7 +5,7 @@ export const mapContainerStyle = {
   height: '100%',
 }
 
-export const center = {
+export const defaultCenter = {
   lat: 43.320904,
   lng: 21.89576,
 }

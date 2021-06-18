@@ -8,7 +8,7 @@ import { markerColors } from '../assets/markerColors'
 import {
   libraries,
   mapContainerStyle,
-  center,
+  defaultCenter,
   options,
 } from './MapConfig/mapConfig'
 import StatefulMarker from './StatefulMarker'
@@ -23,17 +23,20 @@ const getLocalStorage = () => {
   }
 }
 
-const getLocalStorageBounds = () => {
-  let bounds = localStorage.getItem('bounds')
-  if (bounds) {
-    return JSON.parse(localStorage.getItem('bounds'))
+const getLocalStorageZoom = () => {
+  let zoom = localStorage.getItem('zoom')
+  if (zoom) {
+    return JSON.parse(localStorage.getItem('zoom'))
   } else {
-    return {
-      south: 16.870554187035033,
-      west: -5.526114999999994,
-      north: 61.818051113328835,
-      east: 49.317635,
-    }
+    return 4
+  }
+}
+const getLocalStorageCenter = () => {
+  let center = localStorage.getItem('center')
+  if (center) {
+    return JSON.parse(localStorage.getItem('center'))
+  } else {
+    return defaultCenter
   }
 }
 
@@ -48,7 +51,8 @@ function Map() {
   const mapRef = React.useRef()
   const onMapLoad = React.useCallback((map) => {
     mapRef.current = map
-    mapRef.current.fitBounds(getLocalStorageBounds())
+    mapRef.current.setZoom(parseInt(getLocalStorageZoom()))
+    mapRef.current.setCenter(getLocalStorageCenter())
   }, [])
   const panTo = ({ lat, lng }) => {
     mapRef.current.panTo({ lat, lng })
@@ -78,7 +82,7 @@ function Map() {
     let batchArray = []
 
     splitBatch.forEach((element) => {
-      let index = 0
+      let index = 1
       let markedColor = ''
       let newMarker = element.trim().split(',')
       switch (newMarker[2]) {
@@ -104,6 +108,7 @@ function Map() {
           break
         default:
           markedColor = markerColors[1].color
+          index = 1
           break
       }
 
@@ -133,11 +138,14 @@ function Map() {
             mapContainerStyle={mapContainerStyle}
             onLoad={onMapLoad}
             zoom={4}
-            center={center}
+            center={defaultCenter}
             options={options}
             onIdle={() => {
-              let bounds = mapRef.current.getBounds()
-              localStorage.setItem('bounds', JSON.stringify(bounds))
+              let zoom = mapRef.current.getZoom()
+              let center = mapRef.current.getCenter()
+              console.log('getCenter return', center)
+              localStorage.setItem('zoom', JSON.stringify(zoom))
+              localStorage.setItem('center', JSON.stringify(center))
             }}
             onClick={(event) => {
               setMarkerList((oldState) => [
