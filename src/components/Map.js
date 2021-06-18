@@ -23,12 +23,17 @@ const getLocalStorage = () => {
   }
 }
 
-const getLocalStorage1 = () => {
+const getLocalStorageBounds = () => {
   let bounds = localStorage.getItem('bounds')
   if (bounds) {
     return JSON.parse(localStorage.getItem('bounds'))
   } else {
-    return {}
+    return {
+      south: 16.870554187035033,
+      west: -5.526114999999994,
+      north: 61.818051113328835,
+      east: 49.317635,
+    }
   }
 }
 
@@ -37,14 +42,13 @@ function Map() {
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
     libraries: libraries,
   })
-  const [markerList, setMarkerList] = useState(getLocalStorage())
+  const [markerList, setMarkerList] = useState(getLocalStorage)
   const [addBatchMarkers, setAddBatchMarkers] = useState('')
 
   const mapRef = React.useRef()
   const onMapLoad = React.useCallback((map) => {
     mapRef.current = map
-    // let k = getLocalStorage1()
-    mapRef.current.fitBounds(getLocalStorage1())
+    mapRef.current.fitBounds(getLocalStorageBounds())
   }, [])
   const panTo = ({ lat, lng }) => {
     mapRef.current.panTo({ lat, lng })
@@ -74,23 +78,29 @@ function Map() {
     let batchArray = []
 
     splitBatch.forEach((element) => {
+      let index = 0
       let markedColor = ''
       let newMarker = element.trim().split(',')
       switch (newMarker[2]) {
         case 'yellow':
           markedColor = markerColors[0].color
+          index = 0
           break
         case 'red':
           markedColor = markerColors[1].color
+          index = 1
           break
         case 'blue':
           markedColor = markerColors[2].color
+          index = 2
           break
         case 'green':
           markedColor = markerColors[3].color
+          index = 3
           break
         case 'purple':
           markedColor = markerColors[4].color
+          index = 4
           break
         default:
           markedColor = markerColors[1].color
@@ -102,6 +112,7 @@ function Map() {
         lng: parseFloat(newMarker[1]),
         id: uuid(),
         color: markedColor,
+        colorCounter: index,
       })
     })
     let copiedMarkerList = markerList
@@ -124,25 +135,8 @@ function Map() {
             zoom={4}
             center={center}
             options={options}
-            // onBoundsChanged={() => {
-            //   var bounds = mapRef.current.getBounds()
-            //   var ne = bounds.getNorthEast()
-            //   var sw = bounds.getSouthWest()
-            //   // console.log(ne.lat())
-            //   // console.log(ne.lng())
-            //   // console.log(sw.lat())
-            //   // console.log(sw.lng())
-            //   console.log(bounds)
-            // }}
             onIdle={() => {
-              var bounds = mapRef.current.getBounds()
-              var ne = bounds.getNorthEast()
-              var sw = bounds.getSouthWest()
-              // console.log(ne.lat())
-              // console.log(ne.lng())
-              // console.log(sw.lat())
-              // console.log(sw.lng())
-              console.log(bounds)
+              let bounds = mapRef.current.getBounds()
               localStorage.setItem('bounds', JSON.stringify(bounds))
             }}
             onClick={(event) => {
@@ -153,6 +147,7 @@ function Map() {
                   lng: event.latLng.lng(),
                   id: uuid(),
                   color: markerColors[0].color,
+                  colorCounter: 0,
                 },
               ])
             }}
